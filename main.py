@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QByteArray, QEvent 
+from PyQt5.QtGui import QPixmap, QIcon, QFont
+from PyQt5.QtCore import QByteArray, QEvent
 from window import Ui_MainWindow
 from images import *
 from sys import exit
@@ -72,6 +72,9 @@ class MainWindow(QMainWindow):
         self.x1 = 0
 
         self.entry_size_old = 0
+        self.scale = 2
+        self.entry_line_geometry = [300, 34]
+        
 
         pm = QPixmap()
         pm.loadFromData(QByteArray(icon_img))
@@ -80,19 +83,31 @@ class MainWindow(QMainWindow):
         self.ui.save_btn.setIcon(QIcon(pm))
         pm.loadFromData(QByteArray(copy_img))
         self.ui.copy_btn.setIcon(QIcon(pm))
-        self.ui.dock_widget.setWindowTitle("Налаштування")
+        self.ui.dock_widget.setWindowTitle("")
         self.show()
 
+        self.ui.entry_line.setFont(QFont("calibri.ttf", 5 * self.scale))
         self.ui.entry_line.installEventFilter(self)
         self.ui.entry_line.textEdited.connect(self.filter_callback)
         self.ui.entry_line.returnPressed.connect(self.ok_click)
 
         self.ui.ok_btn.clicked.connect(self.ok_click)
         self.ui.save_btn.clicked.connect(self.save_table)
+        self.ui.label_save.mousePressEvent = self.save_table
         self.ui.copy_btn.clicked.connect(self.copy_table)
+        self.ui.label_copy.mousePressEvent = self.copy_table
 
         self.ui.size_spinbox.valueChanged.connect(self.size_changed)
         self.ui.thickness_spinbox.valueChanged.connect(self.thickness_changed)
+
+        self.ui.frame.wheelEvent = self.mouse_wheel_changed
+
+        scale = 3
+        self.scale_changed()
+        scale = 2
+        self.scale_changed()
+        self.ui.frame.setMinimumSize(100, 55 * (3 / 2))
+        self.ui.frame.setMaximumSize(30000, 55 * (3 / 2))
 
     def eventFilter(self, source, event):
         if event.type() == QEvent.KeyPress and source is self.ui.entry_line:
@@ -100,6 +115,29 @@ class MainWindow(QMainWindow):
                 self.check_levels()
                 self.filter_callback(self.ui.entry_line.text())
         return super(MainWindow, self).eventFilter(source, event)
+
+    def mouse_wheel_changed(self, event):
+        if event.angleDelta().y() < 0 and self.scale > 2:
+            self.scale -= 1
+        elif event.angleDelta().y() > 0 and self.scale < 3:
+            self.scale += 1
+        self.scale_changed()
+
+    def scale_changed(self):
+        if self.scale == 3:
+            self.ui.entry_line.setGeometry(23, 14, self.entry_line_geometry[0] * (self.scale / 2), self.entry_line_geometry[1] * (self.scale / 2))
+        else:
+            self.ui.entry_line.setGeometry(23, 22, self.entry_line_geometry[0] * (self.scale / 2), self.entry_line_geometry[1] * (self.scale / 2))
+        #self.ui.frame.setMinimumSize(100, 55 * (self.scale / 2))
+        #self.ui.frame.setMaximumSize(30000, 55 * (self.scale / 2))
+        self.ui.entry_line.setFont(QFont("calibri.ttf", 5 * self.scale))
+
+        self.ui.ok_btn.setGeometry(
+            self.ui.entry_line.pos().x() + self.ui.entry_line.size().width() - 20,
+            self.ui.entry_line.pos().y(),
+            70,
+            self.ui.entry_line.size().height()
+        )
 
     def size_changed(self):
         self.cell_size = self.ui.size_spinbox.value()
@@ -195,29 +233,30 @@ class MainWindow(QMainWindow):
         if self.check_levels():
             self.draw_table()
 
-    def save_table(self):
+    def save_table(self, event = None):
         try:
             self.draw_table()
             options = QFileDialog.Options()
             fileName = ''.join(entry)
-            fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()",fileName,".png", options=options)
+            fileName, _ = QFileDialog.getSaveFileName(self,"Зберегти файл як...",fileName,".png", options=options)
             if fileName:
                 self.image.save(fileName + ".png")
         except:
             pass
     
-    def copy_table(self):
-        self.draw_table()
+    def copy_table(self, event = None):
+        self.draw_table(True)
         qt_image1 = ImageQt.ImageQt(self.image)
         qt_image2 = QPixmap.fromImage(qt_image1)
         QApplication.clipboard().setPixmap(qt_image2)
 
-    def draw_table(self):
+    def draw_table(self, for_copy = False):
         self.image = Image.new("RGBA", self.get_geometry())
-        self.draw()
-        qt_image1 = ImageQt.ImageQt(self.image)
-        qt_image2 = QPixmap.fromImage(qt_image1)
-        self.ui.table.setPixmap(qt_image2)
+        self.draw(for_copy)
+        if not for_copy:
+            qt_image1 = ImageQt.ImageQt(self.image)
+            qt_image2 = QPixmap.fromImage(qt_image1)
+            self.ui.table.setPixmap(qt_image2)
 
     def get_geometry(self):
         try:
@@ -237,11 +276,14 @@ class MainWindow(QMainWindow):
             return (1, 1)
             
 
-    def draw(self):
+    def draw(self, for_copy = False):
         self.x, y = self.thickness, self.image.height
         self.x1, y1 = self.cell_size + self.thickness, y - self.cell_size
         im = ImageDraw.Draw(self.image)
-        im.rectangle((0, 0, self.image.width, self.image.height), fill=(0, 0, 0, 0))
+        if for_copy:
+            im.rectangle((0, 0, self.image.width, self.image.height), fill=(255, 255, 255, 255))
+        else:
+            im.rectangle((0, 0, self.image.width, self.image.height), fill=(0, 0, 0, 0))
 
         lvl = "1"
         slvl = 's'
@@ -275,7 +317,10 @@ class MainWindow(QMainWindow):
             self.x1+=self.cell_size
         
         font = ImageFont.truetype("calibri.ttf", int(self.cell_size/1.5), encoding="unic")
-        im.text((self.x - self.thickness / 2 - blocks/2 * self.cell_size - self.cell_size / 2, y1-self.cell_size/1.5), text, font=font, fill="black")
+        if arrows > 9:
+            im.text((self.x - self.thickness / 2 - blocks/2 * self.cell_size - self.cell_size / 2, y1-self.cell_size/1.5), text, font=font, fill="black")
+        else:
+            im.text((self.x - self.thickness / 2 - blocks/2 * self.cell_size - self.cell_size / 2 + self.thickness * 2, y1-self.cell_size/1.5), text, font=font, fill="black")
 
 
     def arrowedLine(self, draw, ptA, ptB, color=(0,0,0)):
