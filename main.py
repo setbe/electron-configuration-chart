@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt5.QtGui import QPixmap, QIcon, QFont
-from PyQt5.QtCore import QByteArray, QEvent
+from PyQt5.QtCore import QByteArray, QEvent, Qt
 from window import Ui_MainWindow
 from images import *
 from sys import exit
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.entry_size_old = 0
         self.scale = 2
         self.entry_line_geometry = [300, 34]
-        
+        self.was_backspace = False
 
         pm = QPixmap()
         pm.loadFromData(QByteArray(icon_img))
@@ -109,11 +109,18 @@ class MainWindow(QMainWindow):
         self.ui.frame.setMinimumSize(100, 55 * (3 / 2))
         self.ui.frame.setMaximumSize(30000, 55 * (3 / 2))
 
+    def resizeEvent(self, event = None):
+        self.scale_changed()
+
     def eventFilter(self, source, event):
         if event.type() == QEvent.KeyPress and source is self.ui.entry_line:
-            if event.text() == ' ':
-                self.check_levels()
-                self.filter_callback(self.ui.entry_line.text())
+            if event.key() == Qt.Key.Key_Backspace:
+                self.was_backspace = True
+            elif event.text() == ' ':
+                if not self.was_backspace:
+                    self.check_levels()
+                    self.filter_callback(self.ui.entry_line.text())
+                self.was_backspace = False
         return super(MainWindow, self).eventFilter(source, event)
 
     def mouse_wheel_changed(self, event):
@@ -125,12 +132,12 @@ class MainWindow(QMainWindow):
 
     def scale_changed(self):
         if self.scale == 3:
-            self.ui.entry_line.setGeometry(23, 14, self.entry_line_geometry[0] * (self.scale / 2), self.entry_line_geometry[1] * (self.scale / 2))
+            self.ui.entry_line.setGeometry(23, 14, self.ui.frame.width() - 100, self.entry_line_geometry[1] * (self.scale / 2))
         else:
-            self.ui.entry_line.setGeometry(23, 22, self.entry_line_geometry[0] * (self.scale / 2), self.entry_line_geometry[1] * (self.scale / 2))
+            self.ui.entry_line.setGeometry(23, 22, self.ui.frame.width() - 100, self.entry_line_geometry[1] * (self.scale / 2))
         #self.ui.frame.setMinimumSize(100, 55 * (self.scale / 2))
         #self.ui.frame.setMaximumSize(30000, 55 * (self.scale / 2))
-        self.ui.entry_line.setFont(QFont("calibri.ttf", 5 * self.scale))
+        self.ui.entry_line.setFont(QFont("calibri.ttf", 6 * self.scale))
 
         self.ui.ok_btn.setGeometry(
             self.ui.entry_line.pos().x() + self.ui.entry_line.size().width() - 20,
@@ -256,6 +263,7 @@ class MainWindow(QMainWindow):
         if not for_copy:
             qt_image1 = ImageQt.ImageQt(self.image)
             qt_image2 = QPixmap.fromImage(qt_image1)
+            self.ui.table.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.ui.table.setPixmap(qt_image2)
 
     def get_geometry(self):
@@ -277,7 +285,7 @@ class MainWindow(QMainWindow):
             
 
     def draw(self, for_copy = False):
-        self.x, y = self.thickness, self.image.height
+        self.x, y = self.thickness, self.image.height - self.thickness
         self.x1, y1 = self.cell_size + self.thickness, y - self.cell_size
         im = ImageDraw.Draw(self.image)
         if for_copy:

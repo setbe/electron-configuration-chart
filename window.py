@@ -101,12 +101,7 @@ class Ui_MainWindow(object):
 "color: #632626;\n"
 "padding-right: 10px;\n"
 "padding-left: 10px;\n"
-"}\n"
-"\n"
-"QLineEdit:hover {\n"
-"background: #E1D2B8;\n"
-"border: 1px solid #E1D2B8;\n"
-"}")
+"}\n")
         self.entry_line.setInputMask(u"")
         self.entry_line.setText(u"")
         self.entry_line.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
@@ -250,6 +245,6 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Графічна Електронна Формула", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Електронно-графічна Формула", None))
     # retranslateUi
 
