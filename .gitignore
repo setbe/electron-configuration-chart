@@ -1,0 +1,9 @@
+/.vs
+/Debug
+/Release
+/x64
+
+/ecc/Debug
+/ecc/Release
+/ecc/x64
+/ecc/ecc.aps
