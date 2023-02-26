@@ -174,12 +174,14 @@
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="sources\Chart.cpp" />
     <ClCompile Include="sources\main.cpp" />
     <ClCompile Include="sources\MainWindow.cpp" />
     <ClCompile Include="sources\Style.cpp" />
     <ClCompile Include="sources\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="headers\Chart.h" />
     <ClInclude Include="headers\MainWindow.h" />
     <ClInclude Include="headers\Style.h" />
     <ClInclude Include="headers\Window.h" />

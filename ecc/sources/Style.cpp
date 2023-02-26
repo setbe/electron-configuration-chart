@@ -9,15 +9,15 @@ namespace bt {
 	void UseLightTheme()
 	{
 		ImVec4* colors = ImGui::GetStyle().Colors;
-		const ImVec4 bgColor = ColorFromBytes(255, 255, 255);
+		const ImVec4 bgColor = ColorFromBytes(225, 225, 225);
 		const ImVec4 lightBgColor = ColorFromBytes(220, 220, 220);
-		const ImVec4 veryLightBgColor = ColorFromBytes(200, 200, 200);
+		const ImVec4 veryLightBgColor = ColorFromBytes(255, 255, 255);
 
-		const ImVec4 panelColor = ColorFromBytes(200, 200, 200);
-		const ImVec4 panelHoverColor = ColorFromBytes(180, 180, 180);
-		const ImVec4 panelActiveColor = ColorFromBytes(4, 6, 85);
+		const ImVec4 panelColor = ColorFromBytes(255, 255, 255);
+		const ImVec4 panelHoverColor = ColorFromBytes(175, 215, 255);
+		const ImVec4 panelActiveColor = ColorFromBytes(112, 153, 193);
 
-		const ImVec4 textColor = ColorFromBytes(0, 0, 0);
+		const ImVec4 textColor = ColorFromBytes(20, 20, 20);
 		const ImVec4 textDisabledColor = ColorFromBytes(151, 151, 151);
 		const ImVec4 borderColor = ColorFromBytes(78, 78, 78);
 
@@ -31,18 +31,18 @@ namespace bt {
 		colors[ImGuiCol_BorderShadow] = borderColor;
 		colors[ImGuiCol_FrameBg] = panelColor;
 		colors[ImGuiCol_FrameBgHovered] = panelHoverColor;
-		colors[ImGuiCol_FrameBgActive] = panelActiveColor;
+		colors[ImGuiCol_FrameBgActive] = panelColor;
 		colors[ImGuiCol_TitleBg] = bgColor;
 		colors[ImGuiCol_TitleBgActive] = bgColor;
 		colors[ImGuiCol_TitleBgCollapsed] = bgColor;
 		colors[ImGuiCol_MenuBarBg] = bgColor;
 		colors[ImGuiCol_ScrollbarBg] = bgColor;
-		colors[ImGuiCol_ScrollbarGrab] = lightBgColor;
-		colors[ImGuiCol_ScrollbarGrabHovered] = veryLightBgColor;
-		colors[ImGuiCol_ScrollbarGrabActive] = veryLightBgColor;
+		colors[ImGuiCol_ScrollbarGrab] = ImColor(20, 20, 20, 50);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(20, 20, 20, 100);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImColor(20, 20, 20, 30);
 		colors[ImGuiCol_CheckMark] = panelActiveColor;
-		colors[ImGuiCol_SliderGrab] = panelHoverColor;
-		colors[ImGuiCol_SliderGrabActive] = panelActiveColor;
+		colors[ImGuiCol_SliderGrab] = panelActiveColor;
+		colors[ImGuiCol_SliderGrabActive] = panelHoverColor;
 		colors[ImGuiCol_Button] = panelColor;
 		colors[ImGuiCol_ButtonHovered] = panelHoverColor;
 		colors[ImGuiCol_ButtonActive] = panelHoverColor;
@@ -81,5 +81,6 @@ namespace bt {
 		style.ChildRounding = 8.0f;
 		style.WindowMinSize = {220, 100};
 		style.WindowTitleAlign = {0.5f, 0.5f};
+		style.WindowBorderSize = 0.0f;
 	}
 }

@@ -1,8 +1,9 @@
 ﻿#include "MainWindow.h"
 
+
 namespace bt 
 {
-    void delay()
+    void Delay()
     {
         auto start = std::chrono::high_resolution_clock::now();
         auto stop = std::chrono::high_resolution_clock::now();
@@ -11,12 +12,12 @@ namespace bt
         {
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            if (duration.count() >= 9000)
+            if (duration.count() >= 20000)
             {
                 return;
             }
             else
-                std::this_thread::sleep_for(std::chrono::milliseconds(9));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 
@@ -26,6 +27,9 @@ namespace bt
         this->io = nullptr;
         this->running = false;
         this->success = false;
+        this->table_size = 25;
+        this->table_thickness = 2;
+        this->error_ocurred = false;
 
         if (glfwInit())
         {
@@ -48,16 +52,15 @@ namespace bt
                 glfwSetScrollCallback(window, OnScrollCallback);
                 glfwSetWindowSizeCallback(window, OnWindowResizeCallback);
                 glfwSetWindowCloseCallback(window, OnWindowCloseCallback);
-                //glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
 
                 glfwMakeContextCurrent(this->window);
-                glfwSwapInterval(1); // Enable vsync
+                //glfwSwapInterval(1); // Enable vsync
 
                 // Setup Dear ImGui context
                 IMGUI_CHECKVERSION();
                 ImGui::CreateContext();
                 this->io = &(ImGui::GetIO()); (void)io;
-                this->io->Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 16.0f, NULL, io->Fonts->GetGlyphRangesCyrillic());
+                this->io->Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 18.0f, NULL, io->Fonts->GetGlyphRangesCyrillic());
                 this->io->IniFilename = nullptr;
                 
                 io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -127,22 +130,71 @@ namespace bt
         }
 
         glfwSwapBuffers(this->window);
-        delay();
+        Delay();
     }
 
     void MainWindow::RenderGUI()
     {
         ImGuiWindowFlags win_flags = 0;
-        win_flags |= ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse;
+        win_flags |= ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar;
 
         static bool first_time = true;
         if (first_time)
         {
-            ImGui::SetNextWindowSize({ 600, 400 });
+            ImGui::SetNextWindowSize({ 700, 500 });
             first_time = false;
         }
 
         ImGui::Begin(u8"Електронно-графічна Формула", &running, win_flags);
+
+        ImGui::BeginMenuBar();
+        if (ImGui::BeginMenu(u8"Файл"))
+        {
+            if (ImGui::MenuItem(u8"Зберегти...", "Ctrl + S"))
+            {
+                printf(u8"Збереження\n");
+            }
+            if (ImGui::MenuItem(u8"Копіювати", "Ctrl + C"))
+            {
+                printf(u8"Копіювання\n");
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::SameLine();
+        if (ImGui::BeginMenu(u8"Допомога"))
+        {
+            if (ImGui::MenuItem(u8"Використання", "Ctrl + H"))
+            {
+                printf(u8"Збереження\n");
+            }
+            if (ImGui::MenuItem(u8"Про автора", "Ctrl + S"))
+            {
+                printf(u8"Копіювання\n");
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+
+        ImVec2 win_size = ImGui::GetWindowSize();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 5);
+
+        float text_x_pos = win_size.x > 450 ? win_size.x / 2.25f : win_size.x - 30;
+        ImGui::InputTextEx(u8"##Формула", u8"Формула", text, 100, { text_x_pos, 24 }, 0);
+
+        if (win_size.x > 450) {
+            ImGui::SetCursorPos({ win_size.x / 1.75f + win_size.x / 16.0f - ImGui::CalcTextSize(u8"Товщина").x / 2.0f, 82.0f });
+            ImGui::Text(u8"Товщина");
+            ImGui::SetCursorPos({ win_size.x / 1.75f + win_size.x / 4.0f + 10.0f - ImGui::CalcTextSize(u8"Розмір").x  / 2.0f, 82.0f });
+            ImGui::Text(u8"Розмір");
+
+            ImGui::SetNextItemWidth(win_size.x / 8.0f);
+            ImGui::SetCursorPos({ win_size.x / 1.75f, 56.0f});
+            ImGui::SliderInt(u8"##Товщина", &table_thickness, 1, 6);
+
+            ImGui::SetNextItemWidth(win_size.x / 4.0f);
+            ImGui::SetCursorPos({ win_size.x / 1.75f + win_size.x / 8.0f + 10.0f, 56.0f });
+            ImGui::SliderInt(u8"##Розмір", &table_size, 24, 72);
+        }
 
         ImGui::End();
     }

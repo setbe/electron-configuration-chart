@@ -1,6 +1,7 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <stdio.h>
@@ -52,7 +53,11 @@ namespace bt {
         bool running;
         ImVec4 clear_color;
         ImGuiIO* io;
+
+        char text[100];
         int table_size;
+        int table_thickness;
+        bool error_ocurred;
     };
 
     static void OnKeyCallback(GLFWwindow* window, int key, int scan_code, int action, int mods);
